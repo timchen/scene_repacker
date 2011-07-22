@@ -2,40 +2,48 @@ require "rubygems"
 require "mp3info"
 require 'find'
 require 'fileutils'
-dir = '.'
+WORKING_DIR = '.'
 
-#Find.find(dir) do |path|
-#  if FileTest.directory?(path)
-#    if File.basename(path)[0] == ?. and File.basename(path) != '.'
-#      Find.prune
-#    else
-#      next
-#    end
-#  else
-#    puts path
-#  end
-#end
+
+SORTED_DIR = "sorted"
+
+def find_playlist(release_name)
+  playlists = Dir.glob("#{WORKING_DIR}/*.m3u")
+  playlists.each do |playlist|
+    puts playlist
+    IO.readlines(playlist).each do |playlist_line|
+      unless playlist_line.strip!['#']
+        if File.exists?(File.join(WORKING_DIR, playlist_line))# and !File.exist?(File.join(SORTED_DIR, release_name, playlist_line))
+          puts "moving.."
+          #FileUtils.mv(File.join(WORKING_DIR, playlist_line), (File.join(SORTED_DIR, release_name, playlist_line)))
+        end
+      end
+    end
+  end
+end
 
 files_sorted_by_time = Dir['*'].sort_by{ |f| File.ctime(f) }
-puts files_sorted_by_time
 
-# read and display infos & tags
-Mp3Info.open("myfile.mp3") do |mp3info|
-  puts mp3info
+files_sorted_by_time.each do |file|
+  if File.fnmatch('*.par2', file) # par found, best case
+    release_name = file.sub(/\.vol[0-9]{3}\+[0-9]{2}.*/, '')
+    release_name = release_name.sub(/\.par2/, '')
+    puts release_name
+    FileUtils.mkdir(File.join(SORTED_DIR, release_name)) if ! File.exists?(File.join(SORTED_DIR, release_name))
+    #FileUtils.mv(Dir.glob("#{release_name}*"), File.join(SORTED_DIR, "#{release_name}/"))
+    #release_artist = #Afrojack_Feat_Eva_Simons
+    #release_album = #Take_Over_Control__Incl_Ian_Carey_Remix
+    find_playlist(release_name)
+  elsif File.fnmatch('.mp3', file)
+    Mp3Info.open(file) do |mp3|
+      puts "#{file}"
+      puts "    title #{mp3.tag.title}"
+      puts "    artist #{mp3.tag.artist}"
+      puts "    album #{mp3.tag.album}"
+      puts "    tracknum #{mp3.tag.tracknum}"
+    end
+  end
 end
-
-# read/write tag1 and tag2 with Mp3Info#tag attribute
-# when reading tag2 have priority over tag1
-# when writing, each tag is written.
-Mp3Info.open("myfile.mp3") do |mp3|
-  puts mp3.tag.title   
-  puts mp3.tag.artist   
-  puts mp3.tag.album
-  puts mp3.tag.tracknum
-#  mp3.tag.title = "track title"
-#  mp3.tag.artist = "artist name"
-end
-
 #Mp3Info.open("myfile.mp3") do |mp3|
   # you can access four letter v2 tags like this
 #  puts mp3.tag2.TIT2
