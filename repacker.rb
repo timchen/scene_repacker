@@ -7,15 +7,52 @@ WORKING_DIR = '.'
 
 SORTED_DIR = "sorted"
 
+# pass 1, find all pars
+# if no m3u's found, use alt. strategy
+# if VA- don't do anything (yet)
+# if has spaces, don't do anything
+# if no playlist found, don't do anything
+#
+# pass 2, find all the orphan m3us and use those
+
+
+def strip_release_group(release_name)
+  if !release_name.rindex("-").nil?
+    if !release_name[release_name.rindex("-")+1..-1].match(/\D{3}+/).nil?
+      return release_name[0..release_name.rindex("-")-1]
+    end
+  elsif !release_name.rindex("_").nil?
+    if !release_name[release_name.rindex("_")+1..-1].match(/\D{3}+/).nil?
+      return release_name[0..release_name.rindex("_")-1]
+    end
+  end
+  return release_name
+end
+
+def strip_va(release_name)
+  return release_name[3..-1]
+end
+
+def strip_to_basics(release_name)
+  return strip_release_group(strip_va(release_name))
+end
+
 def find_playlist(release_name)
-  playlists = Dir.glob("#{WORKING_DIR}/*.m3u")
+  #puts "Searching for files matching #{release_name}"
+  playlists = Dir.glob("#{WORKING_DIR}/*#{strip_to_basics(release_name).downcase}*.m3u")
+  if playlists.count == 0
+    puts "** no playlist matching #{strip_to_basics(release_name).downcase} found **"
+    return nil
+  end
+  FileUtils.mkdir(File.join(SORTED_DIR, release_name)) if ! File.exists?(File.join(SORTED_DIR, release_name))
+
   playlists.each do |playlist|
-    puts playlist
+    #puts playlist
     IO.readlines(playlist).each do |playlist_line|
       unless playlist_line.strip!['#']
         if File.exists?(File.join(WORKING_DIR, playlist_line))# and !File.exist?(File.join(SORTED_DIR, release_name, playlist_line))
-          puts "moving.."
-          #FileUtils.mv(File.join(WORKING_DIR, playlist_line), (File.join(SORTED_DIR, release_name, playlist_line)))
+          puts "  moving #{playlist_line}"
+          FileUtils.mv(File.join(WORKING_DIR, playlist_line), (File.join(SORTED_DIR, release_name, playlist_line)))
         end
       end
     end
@@ -23,17 +60,21 @@ def find_playlist(release_name)
 end
 
 files_sorted_by_time = Dir['*'].sort_by{ |f| File.ctime(f) }
+    # release_artist = #Afrojack_Feat_Eva_Simons
+    # release_album = #Take_Over_Control__Incl_Ian_Carey_Remix
 
 files_sorted_by_time.each do |file|
   if File.fnmatch('*.par2', file) # par found, best case
+    next if File.fnmatch('* *', file)
+    #puts "par2 found: #{file}"
     release_name = file.sub(/\.vol[0-9]{3}\+[0-9]{2}.*/, '')
     release_name = release_name.sub(/\.par2/, '')
     puts release_name
-    FileUtils.mkdir(File.join(SORTED_DIR, release_name)) if ! File.exists?(File.join(SORTED_DIR, release_name))
-    #FileUtils.mv(Dir.glob("#{release_name}*"), File.join(SORTED_DIR, "#{release_name}/"))
-    #release_artist = #Afrojack_Feat_Eva_Simons
-    #release_album = #Take_Over_Control__Incl_Ian_Carey_Remix
-    find_playlist(release_name)
+    next if find_playlist(release_name).nil? 
+
+    FileUtils.mv(Dir.glob("*#{release_name}*"), File.join(SORTED_DIR, "#{release_name}/"))
+    FileUtils.mv(Dir.glob("*#{strip_to_basics(release_name).downcase}*"), File.join(SORTED_DIR, "#{release_name}/"))
+  
   elsif File.fnmatch('.mp3', file)
     Mp3Info.open(file) do |mp3|
       puts "#{file}"
