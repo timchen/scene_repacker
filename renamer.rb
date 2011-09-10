@@ -2,11 +2,11 @@ require "rubygems"
 require "mp3info"
 require 'find'
 require 'fileutils'
-WORKING_DIR = '/Volumes/Data/Music/#RSS_MOM'
-NON_MUSIC_DIR = '/Volumes/Data/Music/NON_MUSIC'
-REALMOM_NFO_MISSING_DIR = '/Volumes/Data/Music/NFO_MISSING'
+WORKING_DIR = '/Volumes/Media/Music/RSS_WIP/mukki'
+NON_MUSIC_DIR = '/Volumes/Media/Music/RSS_WIP/non_music'
+REALMOM_NFO_MISSING_DIR = '/Volumes/Media/Music/RSS_WIP/nfo_missing'
 
-SORTED_DIR = "/Volumes/Data/Music/MOM_SORTED"
+SORTED_DIR = "/Volumes/Media/Music/RSS"
 
 
 files_sorted_by_time = Dir['*'].sort_by{ |f| File.ctime(f) }
