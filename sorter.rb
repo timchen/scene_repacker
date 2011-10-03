@@ -58,7 +58,8 @@ genre_partials_to_delete = [
   "country", "rock", "metal", "noise", "punk", "humour", "death", "celtic", "folk", "christian", "gospel",
   "oldies", "gothic", "blue", "funk", "soul", "acoustic", "latin", "hardcore", "chanson", "new wave",
   "disco", "rap", "reggae", "raggy", "a capella", "dance hall", "salsa", "ethnic", "comedy", "darkwave",
-  "international", "musical", "polka", "tribal", "big band", "crossover", "swing", "jumpstyle"
+  "international", "musical", "polka", "tribal", "big band", "crossover", "swing", "jumpstyle", "cabaret",
+  "ska", "merengue", "speech", "ballad", "gangsta", "tango"
 ]
 
 release_partials_to_keep = [
