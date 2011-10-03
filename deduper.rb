@@ -2,13 +2,8 @@ require "rubygems"
 require "mp3info"
 require 'find'
 require 'fileutils'
-RSS_DIR = '/Volumes/Media/Music/RSS_WIP/omgwtfnzbs'
+RSS_DIR = '/Volumes/Media/RSS_WIP/omgwtfnzbs'
 MOM_DIR = '/Volumes/Media/Music/RSS'
-
-NON_MUSIC_DIR = '/Volumes/Media/Music/RSS_WIP/non_music'
-REALMOM_NFO_MISSING_DIR = '/Volumes/Media/Music/RSS_WIP/nfo_missing'
-
-SORTED_DIR = "/Volumes/Media/Music/RSS"
 
 
 Dir["#{RSS_DIR}/*/"].each do |dir| 
